@@ -385,7 +385,7 @@ class CalibratedClassifierCV(ClassifierMixin, MetaEstimatorMixin, BaseEstimator)
             self.feature_names_in_ = first_clf.feature_names_in_
         return self
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, unscaled_probs_out=True):
         """Calibrated probabilities of classification.
 
         This function returns calibrated probabilities of classification
@@ -407,10 +407,12 @@ class CalibratedClassifierCV(ClassifierMixin, MetaEstimatorMixin, BaseEstimator)
         mean_proba = np.zeros((_num_samples(X), len(self.classes_)))
         for calibrated_classifier in self.calibrated_classifiers_:
             proba = calibrated_classifier.predict_proba(X)
+            unscaled_probas = proba
             mean_proba += proba
 
         mean_proba /= len(self.calibrated_classifiers_)
-
+        if unscaled_probs_out:
+            return mean_proba, unscaled_probas
         return mean_proba
 
     def predict(self, X):
