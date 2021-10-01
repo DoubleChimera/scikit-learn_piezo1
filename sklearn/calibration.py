@@ -677,7 +677,7 @@ class _CalibratedClassifier:
     def calibrators_(self):
         return self.calibrators
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, unscaled_proba_out=False):
         """Calculate calibrated probabilities.
 
         Calculates classification calibrated probabilities
@@ -719,13 +719,16 @@ class _CalibratedClassifier:
             # probability for a given sample, use the uniform distribution
             # instead.
             uniform_proba = np.full_like(proba, 1 / n_classes)
+            if unscaled_proba_out:
+                unscaled_proba = proba
             proba = np.divide(
                 proba, denominator, out=uniform_proba, where=denominator != 0
             )
 
         # Deal with cases where the predicted probability minimally exceeds 1.0
         proba[(1.0 < proba) & (proba <= 1.0 + 1e-5)] = 1.0
-
+        if unscaled_proba_out:
+            return proba, unscaled_proba
         return proba
 
 
